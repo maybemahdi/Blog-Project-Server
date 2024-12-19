@@ -17,7 +17,7 @@ const getRoot = (req: Request, res: Response) => {
 app.get("/", getRoot);
 
 // application routes
-app.use("/api/v1", router);
+app.use("/api", router);
 
 // global error handler
 app.use(globalErrorHandler);

@@ -71,7 +71,8 @@ const globalErrorHandler = (
   res.status(statusCode).json({
     success: false,
     message,
-    errorSources,
+    statusCode: statusCode,
+    // errorSources,
     err,
     stack: config.node_env=== "development" ? err?.stack : null,
   });
