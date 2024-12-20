@@ -1,17 +1,22 @@
 import { model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
-import { IUser } from "./user.interface";
+import { IUser, UserModel } from "./user.interface";
 import config from "../../config";
 
-const UserSchema = new Schema<IUser>(
+const UserSchema = new Schema<IUser, UserModel>(
   {
+    _id: { type: Schema.Types.ObjectId, required: false },
     name: { type: String, required: [true, "name is required"] },
     email: { type: String, required: [true, "email is required"] },
-    password: { type: String, required: [true, "Password is required"] },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      select: 0,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
-      default: "user"
+      default: "user",
     },
     isBlocked: {
       type: Boolean,
@@ -34,4 +39,24 @@ UserSchema.post("save", function (doc, next) {
   next();
 });
 
-export const User = model<IUser>("User", UserSchema);
+UserSchema.statics.isUserExistsByCustomEmail = async function (email: string) {
+  return await User.findOne({ email }).select("+password");
+};
+
+UserSchema.statics.isPasswordMatched = async function (
+  plainTextPassword,
+  hashedPassword,
+) {
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+
+UserSchema.statics.isJWTIssuedBeforePasswordChanged = function (
+  passwordChangedTimestamp: Date,
+  jwtIssuedTimestamp: number,
+) {
+  const passwordChangedTime =
+    new Date(passwordChangedTimestamp).getTime() / 1000;
+  return passwordChangedTime > jwtIssuedTimestamp;
+};
+
+export const User = model<IUser, UserModel>("User", UserSchema);

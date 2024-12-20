@@ -13,7 +13,7 @@ AuthRoutes.post(
 AuthRoutes.post(
   "/login",
   validateRequest(loginUserValidation),
-  AuthController.loginUser
+  AuthController.loginUser,
 );
 
 export default AuthRoutes;

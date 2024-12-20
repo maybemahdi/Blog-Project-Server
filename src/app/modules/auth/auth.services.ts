@@ -1,5 +1,9 @@
+import AppError from "../../errors/AppError";
 import { User } from "../user/user.model";
-import { IRegisterUser } from "./auth.interface";
+import { ILoginUser, IRegisterUser } from "./auth.interface";
+import httpStatus from "http-status";
+import { createToken } from "./auth.utils";
+import config from "../../config";
 
 const registerUserIntoDB = async (payload: IRegisterUser) => {
   const result = await User.create(payload);
@@ -10,6 +14,45 @@ const registerUserIntoDB = async (payload: IRegisterUser) => {
   };
 };
 
+const loginUser = async (payload: ILoginUser) => {
+  // checking if the user is exist
+  const user = await User.isUserExistsByCustomEmail(payload.email);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
+  }
+  // checking if the user is already deleted
+
+  const isBlocked = user?.isBlocked;
+
+  if (isBlocked) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "This user is blocked!");
+  }
+
+  //checking if the password is correct
+
+  if (!(await User.isPasswordMatched(payload?.password, user?.password)))
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
+
+  //create token and sent to the  client
+
+  const jwtPayload = {
+    email: user.email,
+    role: user.role as string,
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+
+  return {
+    accessToken,
+  };
+};
+
 export const AuthService = {
   registerUserIntoDB,
+  loginUser,
 };
