@@ -19,7 +19,7 @@ const loginUser = async (payload: ILoginUser) => {
   const user = await User.isUserExistsByCustomEmail(payload.email);
 
   if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
   }
   // checking if the user is already deleted
 

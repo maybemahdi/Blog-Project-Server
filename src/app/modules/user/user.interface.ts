@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
-import { Model, Types } from "mongoose";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Model } from "mongoose";
 import { USER_ROLE } from "./user.constant";
 
 export interface IUser {
-  _id?: Types.ObjectId;
+  [x: string]: any;
   name: string;
   email: string;
   password: string;

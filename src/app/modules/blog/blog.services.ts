@@ -1,3 +1,5 @@
+// @typescript-eslint/no-explicit-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Types } from "mongoose";
 import AppError from "../../errors/AppError";
 import { User } from "../user/user.model";
@@ -13,10 +15,10 @@ const createBlog = async (req: Request, blog: IBlog) => {
   if (!userExists) {
     throw new Error("User not found!");
   }
-  const _id = userExists._id as Types.ObjectId;
+  const id = userExists._id as Types.ObjectId;
 
   // Assign the author's ID to the blog
-  blog.author = _id;
+  blog.author = id;
   const result = await Blog.create(blog);
   const populatedBlog = await Blog.findById(result._id).populate("author"); // Adjust fields as needed
 
@@ -27,7 +29,19 @@ const createBlog = async (req: Request, blog: IBlog) => {
     author: populatedBlog?.author,
   };
 };
-const updateBlog = async (id: string, blog: Partial<IBlog>) => {
+const updateBlog = async (req: Request, id: string, blog: Partial<IBlog>) => {
+  const { email } = req.user;
+  const blogExists = await Blog.findById(id).populate("author");
+  if (!blogExists) {
+    throw new AppError(httpStatus.NOT_FOUND, "Blog not found!");
+  }
+  const authorEmail = (blogExists?.author as any)?.email;
+  if (authorEmail !== email) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You are not authorized to update this blog!",
+    );
+  }
   if (!Object.keys(blog).length) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -45,7 +59,24 @@ const updateBlog = async (id: string, blog: Partial<IBlog>) => {
   };
 };
 
+const deleteBlog = async (req: Request, id: string) => {
+  const { email } = req.user;
+  const blogExists = await Blog.findById(id).populate("author");
+  if (!blogExists) {
+    throw new AppError(httpStatus.NOT_FOUND, "Blog not found!");
+  }
+  const authorEmail = (blogExists?.author as any)?.email;
+  if (authorEmail !== email) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You are not authorized to delete this blog!",
+    );
+  }
+  const result = await Blog.findByIdAndDelete(id);
+  return result;
+};
 export const BlogService = {
   createBlog,
   updateBlog,
+  deleteBlog,
 };

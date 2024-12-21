@@ -5,7 +5,6 @@ import config from "../../config";
 
 const UserSchema = new Schema<IUser, UserModel>(
   {
-    _id: { type: Schema.Types.ObjectId, required: false },
     name: { type: String, required: [true, "name is required"] },
     email: { type: String, required: [true, "email is required"] },
     password: {

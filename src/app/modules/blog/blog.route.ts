@@ -19,5 +19,6 @@ BlogRoutes.patch(
   validateRequest(blogValidationSchema.updateBlogValidationSchema),
   BlogController.updateBlog,
 );
+BlogRoutes.delete("/:id", auth(USER_ROLE.user), BlogController.deleteBlog);
 
 export default BlogRoutes;
