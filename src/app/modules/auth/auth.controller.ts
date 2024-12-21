@@ -18,6 +18,11 @@ const loginUser = catchAsync(async (req, res) => {
   const result = await AuthService.loginUser(req.body);
   const { accessToken } = result;
 
+  // Expire the previous token if it exists
+  if (req.cookies.token) {
+    res.clearCookie("token");
+  }
+
   res.cookie("token", accessToken, {
     secure: config.node_env === "production",
     httpOnly: true,
