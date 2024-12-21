@@ -7,6 +7,7 @@ import { IBlog } from "./blog.interface";
 import { Blog } from "./blog.model";
 import { Request } from "express";
 import httpStatus from "http-status";
+import QueryBuilder from "../../builder/QueryBuilder";
 
 const createBlog = async (req: Request, blog: IBlog) => {
   const { user } = req;
@@ -29,6 +30,7 @@ const createBlog = async (req: Request, blog: IBlog) => {
     author: populatedBlog?.author,
   };
 };
+
 const updateBlog = async (req: Request, id: string, blog: Partial<IBlog>) => {
   const { email } = req.user;
   const blogExists = await Blog.findById(id).populate("author");
@@ -75,8 +77,20 @@ const deleteBlog = async (req: Request, id: string) => {
   const result = await Blog.findByIdAndDelete(id);
   return result;
 };
+
+const getAllBlogs = async (query: Record<string, unknown>) => {
+  const blogsQuery = new QueryBuilder(Blog.find().populate("author"), query)
+    .search(["title", "content"])
+    .filter()
+    .sort();
+
+  const blogs = await blogsQuery.modelQuery;
+  return blogs;
+};
+
 export const BlogService = {
   createBlog,
   updateBlog,
   deleteBlog,
+  getAllBlogs,
 };

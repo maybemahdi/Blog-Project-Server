@@ -25,6 +25,12 @@ const UserSchema = new Schema<IUser, UserModel>(
   { timestamps: true },
 );
 
+UserSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    delete ret.__v;
+  },
+});
+
 UserSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(
     this.password,

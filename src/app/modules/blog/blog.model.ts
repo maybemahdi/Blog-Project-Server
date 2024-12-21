@@ -14,4 +14,15 @@ const BlogSchema = new Schema<IBlog>(
   { timestamps: true },
 );
 
+// Transform the output to exclude __v, isPublished, and timestamps
+BlogSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    delete ret.__v;
+    delete ret.isPublished;
+    delete ret.createdAt;
+    delete ret.updatedAt;
+    return ret;
+  },
+});
+
 export const Blog = model<IBlog>("Blog", BlogSchema);
