@@ -34,11 +34,11 @@ const auth = (...requiredRoles: IUserRole[]) => {
       throw new AppError(httpStatus.NOT_FOUND, "This user is not found!");
     }
 
-    const isBlocked = user?.isBlocked;
+    // const isBlocked = user?.isBlocked;
 
-    if (isBlocked) {
-      throw new AppError(httpStatus.FORBIDDEN, "This user is blocked!");
-    }
+    // if (isBlocked) {
+    //   throw new AppError(httpStatus.FORBIDDEN, "This user is blocked!");
+    // }
 
     if (requiredRoles && !requiredRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized!");
